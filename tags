@@ -1,0 +1,148 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+AdetCheckpointer	fcos/checkpoint/adet_checkpoint.py	/^class AdetCheckpointer(DetectionCheckpointer):$/;"	c
+COCOEvaluator	fcos/evaluation/coco_evaluation.py	/^class COCOEvaluator(DatasetEvaluator):$/;"	c
+FCOS	fcos/modeling/fcos/fcos.py	/^class FCOS(nn.Module):$/;"	c
+FCOSHead	fcos/modeling/fcos/fcos_head.py	/^class FCOSHead(nn.Module):$/;"	c
+FCOSLosses	fcos/modeling/fcos/fcos_losses.py	/^def FCOSLosses($/;"	f
+FCOSTargets	fcos/modeling/fcos/fcos_targets.py	/^def FCOSTargets(all_level_points, gt_instances, cfg):$/;"	f
+INF	fcos/modeling/fcos/fcos.py	/^INF = 100000000$/;"	v
+INF	fcos/modeling/fcos/fcos_targets.py	/^INF = 100000000$/;"	v
+IOULoss	fcos/layers/iou_loss.py	/^class IOULoss(nn.Module):$/;"	c
+LastLevelP6	fcos/modeling/backbone/fpn.py	/^class LastLevelP6(nn.Module):$/;"	c
+LastLevelP6P7	fcos/modeling/backbone/fpn.py	/^class LastLevelP6P7(nn.Module):$/;"	c
+OneStageDetector	fcos/modeling/meta_arch/one_stage_detector.py	/^class OneStageDetector(ProposalNetwork):$/;"	c
+Scale	fcos/layers/scale.py	/^class Scale(nn.Module):$/;"	c
+Trainer	train_net.py	/^class Trainer(DefaultTrainer):$/;"	c
+_EXCLUDE	fcos/modeling/__init__.py	/^_EXCLUDE = {"torch", "ShapeSpec"}$/;"	v
+__all__	fcos/checkpoint/__init__.py	/^__all__ = ["AdetCheckpointer"]$/;"	v
+__all__	fcos/config/__init__.py	/^__all__ = [$/;"	v
+__all__	fcos/layers/__init__.py	/^__all__ = ['IOULoss', 'ml_nms', 'normal_init', 'Scale']$/;"	v
+__all__	fcos/modeling/__init__.py	/^__all__ = [k for k in globals().keys() if k not in _EXCLUDE and not k.startswith("_")]$/;"	v
+__all__	fcos/modeling/backbone/__init__.py	/^__all__ = ['LastLevelP6', 'LastLevelP6P7', 'build_fcos_resnet_fpn_backbone']$/;"	v
+__all__	fcos/modeling/backbone/fpn.py	/^__all__ = [$/;"	v
+__all__	fcos/modeling/fcos/__init__.py	/^__all__ = ['FCOS', 'FCOSHead', 'FCOSLosses', 'FCOSTargets']$/;"	v
+__all__	fcos/modeling/fcos/fcos.py	/^__all__ = ["FCOS"]$/;"	v
+__all__	fcos/modeling/meta_arch/__init__.py	/^__all__ = ['OneStageDetector']$/;"	v
+__all__	fcos/utils/__init__.py	/^__all__ = ['multi_apply']$/;"	v
+__init__	fcos/evaluation/coco_evaluation.py	/^    def __init__(self, dataset_name, cfg, distributed, output_dir=None):$/;"	m	class:COCOEvaluator
+__init__	fcos/layers/iou_loss.py	/^    def __init__(self, loc_loss_type='iou', eps=1e-5):$/;"	m	class:IOULoss
+__init__	fcos/layers/scale.py	/^    def __init__(self, scale=1.0):$/;"	m	class:Scale
+__init__	fcos/modeling/backbone/fpn.py	/^    def __init__(self, in_channels, out_channels, in_features="res5"):$/;"	m	class:LastLevelP6
+__init__	fcos/modeling/backbone/fpn.py	/^    def __init__(self, in_channels, out_channels, in_features="res5"):$/;"	m	class:LastLevelP6P7
+__init__	fcos/modeling/fcos/fcos.py	/^    def __init__(self, cfg, input_shape: Dict[str, ShapeSpec]):$/;"	m	class:FCOS
+__init__	fcos/modeling/fcos/fcos_head.py	/^    def __init__(self, cfg, input_shape: List[ShapeSpec]):$/;"	m	class:FCOSHead
+__init__	train_net.py	/^    def __init__(self, cfg):$/;"	m	class:Trainer
+__version__	fcos/__init__.py	/^__version__ = "0.1"$/;"	v
+_derive_coco_results	fcos/evaluation/coco_evaluation.py	/^    def _derive_coco_results(self, coco_eval, iou_type, class_names=None):$/;"	m	class:COCOEvaluator
+_eval_box_proposals	fcos/evaluation/coco_evaluation.py	/^    def _eval_box_proposals(self, predictions):$/;"	m	class:COCOEvaluator
+_eval_predictions	fcos/evaluation/coco_evaluation.py	/^    def _eval_predictions(self, tasks, predictions):$/;"	m	class:COCOEvaluator
+_evaluate_box_proposals	fcos/evaluation/coco_evaluation.py	/^def _evaluate_box_proposals(dataset_predictions, coco_api, thresholds=None, area="all", limit=None):$/;"	f
+_evaluate_predictions_on_coco	fcos/evaluation/coco_evaluation.py	/^def _evaluate_predictions_on_coco(coco_gt, coco_results, iou_type, kpt_oks_sigmas=None):$/;"	f
+_init_layers	fcos/modeling/fcos/fcos_head.py	/^    def _init_layers(self):$/;"	m	class:FCOSHead
+_init_weights	fcos/modeling/fcos/fcos_head.py	/^    def _init_weights(self):$/;"	m	class:FCOSHead
+_load_file	fcos/checkpoint/adet_checkpoint.py	/^    def _load_file(self, filename):$/;"	m	class:AdetCheckpointer
+_tasks_from_config	fcos/evaluation/coco_evaluation.py	/^    def _tasks_from_config(self, cfg):$/;"	m	class:COCOEvaluator
+areas	fcos/modeling/fcos/fcos_targets.py	/^    areas = NotImplemented  # 1. `torch.Tensor` shape of (num_gts, 1)$/;"	v
+areas	fcos/modeling/fcos/fcos_targets.py	/^    areas = NotImplemented  # 2. hint: use :func:`torch.repeat`.$/;"	v
+args	train_net.py	/^        args=(args,),$/;"	v
+args	train_net.py	/^    args = default_argument_parser().parse_args()$/;"	v
+bbox_targets	fcos/modeling/fcos/fcos_targets.py	/^    bbox_targets = bbox_targets[range(num_points), min_area_inds]$/;"	v
+bbox_targets	fcos/modeling/fcos/fcos_targets.py	/^    bbox_targets = torch.stack((left, top, right, bottom), -1)$/;"	v
+bbox_targets_list	fcos/modeling/fcos/fcos_targets.py	/^    bbox_targets_list = [$/;"	v
+bottom	fcos/modeling/fcos/fcos_targets.py	/^    bottom = NotImplemented$/;"	v
+boxes	fcos/layers/ml_nms.py	/^    boxes = boxlist.pred_boxes.tensor$/;"	v
+boxlist	fcos/layers/ml_nms.py	/^    boxlist = boxlist[keep]$/;"	v
+build_evaluator	train_net.py	/^    def build_evaluator(cls, cfg, dataset_name, output_folder=None):$/;"	m	class:Trainer
+build_fcos_resnet_fpn_backbone	fcos/modeling/backbone/fpn.py	/^def build_fcos_resnet_fpn_backbone(cfg, input_shape: ShapeSpec):$/;"	f
+build_train_loader	train_net.py	/^    def build_train_loader(cls, cfg):$/;"	m	class:Trainer
+cb_dist_bottom	fcos/modeling/fcos/fcos_targets.py	/^        cb_dist_bottom = NotImplemented$/;"	v
+cb_dist_left	fcos/modeling/fcos/fcos_targets.py	/^        cb_dist_left = NotImplemented$/;"	v
+cb_dist_right	fcos/modeling/fcos/fcos_targets.py	/^        cb_dist_right = NotImplemented$/;"	v
+cb_dist_top	fcos/modeling/fcos/fcos_targets.py	/^        cb_dist_top = NotImplemented$/;"	v
+center_bbox	fcos/modeling/fcos/fcos_targets.py	/^        center_bbox = torch.stack($/;"	v
+center_gts	fcos/modeling/fcos/fcos_targets.py	/^        center_gts = torch.zeros_like(gt_bboxes)$/;"	v
+center_radius	fcos/modeling/fcos/fcos_targets.py	/^    center_radius = center_sample_cfg.pop('center_radius', 1.5)$/;"	v
+center_sample	fcos/modeling/fcos/fcos_targets.py	/^    center_sample = center_sample_cfg.pop('center_sample', True)$/;"	v
+center_sample_cfg	fcos/modeling/fcos/fcos_targets.py	/^        center_sample_cfg=center_sample_cfg,$/;"	v
+center_xs	fcos/modeling/fcos/fcos_targets.py	/^        center_xs = NotImplemented  # center x-coordinates of gt_bboxes$/;"	v
+center_ys	fcos/modeling/fcos/fcos_targets.py	/^        center_ys = NotImplemented  # center y-coordinates of gt_bboxes$/;"	v
+compute_centerness_targets	fcos/modeling/fcos/fcos_targets.py	/^def compute_centerness_targets(pos_bbox_targets):$/;"	f
+concat_bbox_targets	fcos/modeling/fcos/fcos_targets.py	/^    concat_bbox_targets = []$/;"	v
+concat_labels	fcos/modeling/fcos/fcos_targets.py	/^    concat_labels = []$/;"	v
+concat_points	fcos/modeling/fcos/fcos_targets.py	/^    concat_points = cat(points, dim=0)$/;"	v
+concat_regress_ranges	fcos/modeling/fcos/fcos_targets.py	/^    concat_regress_ranges = cat(expanded_regress_ranges, dim=0)$/;"	v
+dist_url	train_net.py	/^        dist_url=args.dist_url,$/;"	v
+evaluate	fcos/evaluation/coco_evaluation.py	/^    def evaluate(self):$/;"	m	class:COCOEvaluator
+expanded_regress_ranges	fcos/modeling/fcos/fcos_targets.py	/^    expanded_regress_ranges = [$/;"	v
+fcos_target	fcos/modeling/fcos/fcos_targets.py	/^def fcos_target($/;"	f
+fcos_target_single_image	fcos/modeling/fcos/fcos_targets.py	/^def fcos_target_single_image($/;"	f
+forward	fcos/layers/iou_loss.py	/^    def forward(self, pred, target, weight=None):$/;"	m	class:IOULoss
+forward	fcos/layers/scale.py	/^    def forward(self, x):$/;"	m	class:Scale
+forward	fcos/modeling/backbone/fpn.py	/^    def forward(self, x):$/;"	m	class:LastLevelP6
+forward	fcos/modeling/backbone/fpn.py	/^    def forward(self, x):$/;"	m	class:LastLevelP6P7
+forward	fcos/modeling/fcos/fcos.py	/^    def forward(self, images, features, gt_instances):$/;"	m	class:FCOS
+forward	fcos/modeling/fcos/fcos_head.py	/^    def forward(self, features):$/;"	m	class:FCOSHead
+forward	fcos/modeling/meta_arch/one_stage_detector.py	/^    def forward(self, batched_inputs):$/;"	m	class:OneStageDetector
+fpn_strides	fcos/modeling/fcos/fcos_targets.py	/^        fpn_strides=fpn_strides,$/;"	v
+generate_regress_ranges	fcos/modeling/fcos/fcos_targets.py	/^def generate_regress_ranges(sizes_of_interest):$/;"	f
+get_cfg	fcos/config/config.py	/^def get_cfg() -> CfgNode:$/;"	f
+get_points	fcos/modeling/fcos/fcos_targets.py	/^def get_points(features, fpn_strides):$/;"	f
+get_points_single	fcos/modeling/fcos/fcos_targets.py	/^def get_points_single(featmap_size, stride, device):$/;"	f
+gt_bboxes	fcos/modeling/fcos/fcos_targets.py	/^    gt_bboxes = NotImplemented  # hint: use :func:`torch.expand`.$/;"	v
+gt_bboxes	fcos/modeling/fcos/fcos_targets.py	/^    gt_bboxes = NotImplemented$/;"	v
+gt_labels	fcos/modeling/fcos/fcos_targets.py	/^    gt_labels = NotImplemented$/;"	v
+inside_gt_bbox_mask	fcos/modeling/fcos/fcos_targets.py	/^        inside_gt_bbox_mask = NotImplemented$/;"	v
+inside_regress_range	fcos/modeling/fcos/fcos_targets.py	/^    inside_regress_range = (NotImplemented)$/;"	v
+instances_to_coco_json	fcos/evaluation/coco_evaluation.py	/^def instances_to_coco_json(instances, img_id):$/;"	f
+keep	fcos/layers/ml_nms.py	/^        keep = keep[:max_proposals]$/;"	v
+keep	fcos/layers/ml_nms.py	/^    keep = batched_nms(boxes, scores, labels, nms_thresh)$/;"	v
+labels	fcos/layers/ml_nms.py	/^    labels = boxlist.pred_classes$/;"	v
+labels	fcos/modeling/fcos/fcos_targets.py	/^    labels = gt_labels[min_area_inds]$/;"	v
+labels_list	fcos/modeling/fcos/fcos_targets.py	/^    labels_list = [labels.split(num_points, 0) for labels in labels_list]$/;"	v
+left	fcos/modeling/fcos/fcos_targets.py	/^    left = NotImplemented$/;"	v
+lvl_begin	fcos/modeling/fcos/fcos_targets.py	/^            lvl_begin = lvl_end$/;"	v
+lvl_begin	fcos/modeling/fcos/fcos_targets.py	/^        lvl_begin = 0$/;"	v
+lvl_end	fcos/modeling/fcos/fcos_targets.py	/^            lvl_end = lvl_begin + num_points_lvl$/;"	v
+machine_rank	train_net.py	/^        machine_rank=args.machine_rank,$/;"	v
+main	train_net.py	/^def main(args):$/;"	f
+max_regress_distance	fcos/modeling/fcos/fcos_targets.py	/^    max_regress_distance = NotImplemented   # hint: use :func:`torch.max`.$/;"	v
+ml_nms	fcos/layers/ml_nms.py	/^def ml_nms($/;"	f
+multi_apply	fcos/utils/misc.py	/^def multi_apply(func, *args, **kwargs):$/;"	f
+normal_init	fcos/layers/normal_init.py	/^def normal_init(module, mean=0, std=1, bias=0):$/;"	f
+normalize_reg_targets	fcos/modeling/fcos/fcos_targets.py	/^        normalize_reg_targets=normalize_reg_targets,$/;"	v
+normalizer	fcos/modeling/fcos/fcos_targets.py	/^            normalizer = 1.0$/;"	v
+normalizer	fcos/modeling/fcos/fcos_targets.py	/^            normalizer = float(fpn_strides[i])$/;"	v
+num_classes	fcos/modeling/fcos/fcos_targets.py	/^        num_classes=num_classes$/;"	v
+num_gts	fcos/modeling/fcos/fcos_targets.py	/^    num_gts = len(gt_instances)$/;"	v
+num_levels	fcos/modeling/fcos/fcos_targets.py	/^    num_levels = len(points)$/;"	v
+num_machines	train_net.py	/^        num_machines=args.num_machines,$/;"	v
+num_points	fcos/modeling/fcos/fcos_targets.py	/^    num_points = [center.size(0) for center in points]$/;"	v
+num_points	fcos/modeling/fcos/fcos_targets.py	/^    num_points = points.size(0)$/;"	v
+num_points_per_level	fcos/modeling/fcos/fcos_targets.py	/^        num_points_per_level=num_points,$/;"	v
+points	fcos/modeling/fcos/fcos_targets.py	/^        points=concat_points,$/;"	v
+predict_proposals	fcos/modeling/fcos/fcos.py	/^    def predict_proposals($/;"	m	class:FCOS
+predict_proposals_single_image	fcos/modeling/fcos/fcos.py	/^    def predict_proposals_single_image($/;"	m	class:FCOS
+process	fcos/evaluation/coco_evaluation.py	/^    def process(self, inputs, outputs):$/;"	m	class:COCOEvaluator
+radius	fcos/modeling/fcos/fcos_targets.py	/^        radius = center_radius$/;"	v
+regress_ranges	fcos/modeling/fcos/fcos_targets.py	/^        regress_ranges=concat_regress_ranges,$/;"	v
+regress_ranges	fcos/modeling/fcos/fcos_targets.py	/^    regress_ranges = NotImplemented  # hint: use :func:`torch.expand`.$/;"	v
+reset	fcos/evaluation/coco_evaluation.py	/^    def reset(self):$/;"	m	class:COCOEvaluator
+right	fcos/modeling/fcos/fcos_targets.py	/^    right = NotImplemented$/;"	v
+scores	fcos/layers/ml_nms.py	/^    scores = boxlist.scores$/;"	v
+setup	train_net.py	/^def setup(args):$/;"	f
+stride	fcos/modeling/fcos/fcos_targets.py	/^        stride = center_xs.new_zeros(center_xs.shape)$/;"	v
+test_with_TTA	train_net.py	/^    def test_with_TTA(cls, cfg, model):$/;"	m	class:Trainer
+top	fcos/modeling/fcos/fcos_targets.py	/^    top = NotImplemented$/;"	v
+train	train_net.py	/^    def train(self):$/;"	m	class:Trainer
+train_loop	train_net.py	/^    def train_loop(self, start_iter: int, max_iter: int):$/;"	m	class:Trainer
+x_maxs	fcos/modeling/fcos/fcos_targets.py	/^        x_maxs = NotImplemented$/;"	v
+x_mins	fcos/modeling/fcos/fcos_targets.py	/^        x_mins = NotImplemented$/;"	v
+xs	fcos/modeling/fcos/fcos_targets.py	/^    xs = NotImplemented  # hint: use :func:`torch.expand`.$/;"	v
+y_maxs	fcos/modeling/fcos/fcos_targets.py	/^        y_maxs = NotImplemented$/;"	v
+y_mins	fcos/modeling/fcos/fcos_targets.py	/^        y_mins = NotImplemented$/;"	v
+ys	fcos/modeling/fcos/fcos_targets.py	/^    ys = NotImplemented  # hint: use :func:`torch.expand`.$/;"	v
