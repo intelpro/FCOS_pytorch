@@ -1,6 +1,6 @@
 import math
 import torch.nn as nn
-
+import torch as th
 from detectron2.layers import Conv2d, DeformConv, ShapeSpec
 from fcos.layers import Scale, normal_init
 from typing import List
@@ -49,13 +49,19 @@ class FCOSHead(nn.Module):
         activation = nn.ReLU()
 
         """ your code starts here """
-        self.shared_convs = None
-        self.cls_convs = None
-        self.reg_convs = None
-        self.cls_logits = None
-        self.bbox_pred = None
-        self.centerness = None
-        self.scales = None
+        self.shared_convs = nn.Sequential(nn.Conv2d(self.in_channels, self.in_channels, kernel_size=3, padding=1), \
+                                          nn.GroupNorm(32, self.in_channels),
+                                          activation)
+        self.cls_convs = nn.Sequential(nn.Conv2d(self.in_channels, self.in_channels, kernel_size=3, padding=1), \
+                                       nn.GroupNorm(32, self.in_channels), \
+                                       activation)
+        self.reg_convs = nn.Sequential(nn.Conv2d(self.in_channels, self.in_channels, kernel_size=3, padding=1), \
+                                       nn.GroupNorm(32, self.in_channels), \
+                                       activation)
+        self.cls_logits = nn.Conv2d(self.in_channels, self.num_classes, kernel_size=3, padding=1)
+        self.bbox_pred = nn.Conv2d(self.in_channels, 4, kernel_size=3, padding=1)
+        self.centerness = nn.Conv2d(self.in_channels, 1, kernel_size=3, padding=1)
+        self.scales = nn.ModuleList([Scale(1.0)]*5)
         """ your code ends here """
 
     def _init_weights(self):
@@ -67,7 +73,7 @@ class FCOSHead(nn.Module):
             pass
 
         # initialize the bias for classification logits
-        bias_cls = None  # calculate proper value that makes cls_probability with `self.prior_prob`
+        bias_cls = -math.log((1-self.prior_prob)/self.prior_prob)# calculate proper value that makes cls_probability with `self.prior_prob`
         # In other words, make the initial 'sigmoid' activation of cls_logits as `self.prior_prob`
         # by controlling bias initialization
         nn.init.constant_(self.cls_logits.bias, bias_cls)
@@ -96,6 +102,16 @@ class FCOSHead(nn.Module):
         centernesses = []
         for feat_level, feature in enumerate(features):
             """ your code starts here """
-
+            convs_feat = self.shared_convs(feature)
+            cls_output = self.cls_convs(convs_feat)
+            
+            # find logit
+            cls_scores.append(self.cls_logits(cls_output))
+            # find centerness
+            centernesses.append(self.centerness(cls_output))
+            # find bbox pred
+            reg_feat = self.reg_convs(convs_feat)
+            bbox_pred = th.exp(self.scales[feat_level](self.bbox_pred(reg_feat)))
+            bbox_preds.append(bbox_pred)
             """ your code ends here """
         return cls_scores, bbox_preds, centernesses

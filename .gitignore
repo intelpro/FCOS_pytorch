@@ -1,2 +1,5 @@
 datasets/
 output/
+detectron2/
+tags
+__pycache__

@@ -82,7 +82,13 @@ def get_points_single(featmap_size, stride, device):
     """
 
     """ your code starts here """
-    points = None
+    height, width = featmap_size
+    x_shift = torch.arange(0, width*stride, step=stride, dtype=torch.float32, device=device)
+    y_shift = torch.arange(0, height*stride, step=stride, dtype=torch.float32, device=device)
+    mesh_x, mesh_y = torch.meshgrid(x_shift, y_shift)
+    mesh_x_re = mesh_x.reshape(-1)
+    mesh_y_re = mesh_y.reshape(-1)
+    points = torch.stack((mesh_x_re, mesh_y_re), 1) + stride//2
     """ your code ends here """
     return points
 
@@ -204,8 +210,8 @@ def fcos_target_single_image(
     num_gts = len(gt_instances)
 
     # get class labels and bboxes from `gt_instances`.
-    gt_labels = NotImplemented
-    gt_bboxes = NotImplemented
+    gt_labels = gt_instances.gt_classes
+    gt_bboxes = gt_instances.gt_boxes.tensor
 
     if num_gts == 0:
         return (
@@ -213,9 +219,10 @@ def fcos_target_single_image(
             gt_bboxes.new_zeros((num_points, 4))
         )
 
+    import pdb; pdb.set_trace()
     # `areas`: should be `torch.Tensor` shape of (num_points, num_gts, 1)
     areas = NotImplemented  # 1. `torch.Tensor` shape of (num_gts, 1)
-    areas = NotImplemented  # 2. hint: use :func:`torch.repeat`.
+    areas = torch.repat# 2. hint: use :func:`torch.repeat`.
 
     # `regress_ranges`: should be `torch.Tensor` shape of (num_points, num_gts, 2)
     regress_ranges = NotImplemented  # hint: use :func:`torch.expand`.
