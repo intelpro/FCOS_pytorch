@@ -32,7 +32,6 @@ Naming convention:
 
 @PROPOSAL_GENERATOR_REGISTRY.register()
 class FCOS(nn.Module):
-
     def __init__(self, cfg, input_shape: Dict[str, ShapeSpec]):
         super().__init__()
         # fmt: off
@@ -186,7 +185,6 @@ class FCOS(nn.Module):
             bbox_pred = bbox_pred.permute(1, 2, 0).reshape(-1, 4)
             # (1, Hi, Wi) -> (Hi*Wi, )
             centerness = centerness.permute(1, 2, 0).reshape(-1).sigmoid()
-
             """ Your code starts here """
 
             """ Your code ends here """

@@ -1,10 +1,9 @@
 import torch
+from .fcos_targets import compute_centerness_targets
 import torch.nn.functional as F
 from fvcore.nn import sigmoid_focal_loss_jit
-
 from detectron2.layers import cat
 
-from .fcos_targets import compute_centerness_targets
 
 
 def FCOSLosses(
@@ -96,6 +95,12 @@ def FCOSLosses(
         reduction="sum"
     ) / num_pos
 
+    print('loss_bbox: ')
+    print(loss_bbox)
+    print('loss_centerness: ')
+    print(loss_centerness)
+    print('loss cls: ')
+    print(loss_cls)
     # final loss dict.
     losses = dict(
         loss_fcos_cls=loss_cls,

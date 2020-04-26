@@ -219,36 +219,48 @@ def fcos_target_single_image(
             gt_bboxes.new_zeros((num_points, 4))
         )
 
-    import pdb; pdb.set_trace()
     # `areas`: should be `torch.Tensor` shape of (num_points, num_gts, 1)
-    areas = NotImplemented  # 1. `torch.Tensor` shape of (num_gts, 1)
-    areas = torch.repat# 2. hint: use :func:`torch.repeat`.
+    areas = (gt_bboxes[:, 2] - gt_bboxes[:, 0]+1)*(gt_bboxes[:, 3] - gt_bboxes[:, 1]+1) # 1. `torch.Tensor` shape of (num_gts, 1)
+    areas = areas[None].repeat(num_points, 1)
+    """
+    areas_un = areas.unsqueeze(1)
+    areas = areas_un.repeat(num_points, 1, 1)
+    """
+    assert areas.shape==(num_points, num_gts)
 
     # `regress_ranges`: should be `torch.Tensor` shape of (num_points, num_gts, 2)
-    regress_ranges = NotImplemented  # hint: use :func:`torch.expand`.
+    regress_ranges = regress_ranges.unsqueeze(1)
+    assert regress_ranges.shape==(num_points, 1, 2)
+    regress_ranges = regress_ranges.expand(num_points, num_gts, 2) # hint: use :func:`torch.expand`.
+    assert regress_ranges.shape==(num_points, num_gts, 2)
 
     # `gt_bboxes`: should be `torch.Tensor` shape of (num_points, num_gts, 4)
-    gt_bboxes = NotImplemented  # hint: use :func:`torch.expand`.
+    gt_bboxes = gt_bboxes.expand(num_points, num_gts, 4)# hint: use :func:`torch.expand`.
+    assert gt_bboxes.shape==(num_points, num_gts, 4)
 
     # align each coordinate  component xs, ys in shape as (num_points, num_gts)
     xs, ys = points[:, 0], points[:, 1]
-    xs = NotImplemented  # hint: use :func:`torch.expand`.
-    ys = NotImplemented  # hint: use :func:`torch.expand`.
+    xs = xs.unsqueeze(1)
+    ys = ys.unsqueeze(1)
+    xs_expand = xs.expand(num_points, num_gts) # hint: use :func:`torch.expand`.
+    ys_expand = ys.expand(num_points, num_gts)# hint: use :func:`torch.expand`.
+    assert xs_expand.shape==(num_points, num_gts)
+    assert ys_expand.shape==(num_points, num_gts)
 
     # distances to each four side of gt bboxes.
     # The equations correspond to equation(1) from FCOS paper.
-    left = NotImplemented
-    right = NotImplemented
-    top = NotImplemented
-    bottom = NotImplemented
+    left = xs_expand - gt_bboxes[..., 0]
+    right = gt_bboxes[..., 2] - xs_expand
+    top = ys_expand - gt_bboxes[..., 1]
+    bottom = gt_bboxes[..., 3] - ys_expand
     bbox_targets = torch.stack((left, top, right, bottom), -1)
 
     if center_sample:
         # This codeblock corresponds to extra credits. Note that `Not mendatory`.
         # condition1: inside a `center bbox`
         radius = center_radius
-        center_xs = NotImplemented  # center x-coordinates of gt_bboxes
-        center_ys = NotImplemented  # center y-coordinates of gt_bboxes
+        center_xs = (gt_bboxes[:,:,0] + gt_bboxes[:,:,2])/2 # center x-coordinates of gt_bboxes
+        center_ys = (gt_bboxes[:,:,1] + gt_bboxes[:,:,3])/2 # center y-coordinates of gt_bboxes
         center_gts = torch.zeros_like(gt_bboxes)
         stride = center_xs.new_zeros(center_xs.shape)
 
@@ -258,29 +270,29 @@ def fcos_target_single_image(
             lvl_end = lvl_begin + num_points_lvl
             # radius back-projected to image coordinates
             # hint: use `fpn_strides` and `radius`
-            stride[lvl_begin:lvl_end] = NotImplemented
+            stride[lvl_begin:lvl_end] = fpn_strides[lvl_idx]*radius
             lvl_begin = lvl_end
 
         # The boundary coordinates w.r.t radius(stride) and center points
         # (center coords) (- or +) (stride)
-        x_mins = NotImplemented
-        y_mins = NotImplemented
-        x_maxs = NotImplemented
-        y_maxs = NotImplemented
+        x_mins = center_xs - stride
+        y_mins = center_ys - stride
+        x_maxs = center_xs + stride
+        y_maxs = center_ys + stride 
 
         # Clip each four coordinates so that (x_mins, y_mins) and (x_maxs, y_maxs) are
         #   inside gt_bboxes. HINT: use :func:`torch.where`.
-        center_gts[..., 0] = NotImplemented
-        center_gts[..., 1] = NotImplemented
-        center_gts[..., 2] = NotImplemented
-        center_gts[..., 3] = NotImplemented
+        center_gts[..., 0] = torch.where(x_mins > gt_bboxes[:,:,0], x_mins, gt_bboxes[:,:,0])
+        center_gts[..., 1] = torch.where(y_mins > gt_bboxes[:,:,1], y_mins, gt_bboxes[:,:,1])
+        center_gts[..., 2] = torch.where(x_maxs > gt_bboxes[:,:,2], gt_bboxes[:,:,2], x_maxs)
+        center_gts[..., 3] = torch.where(y_maxs > gt_bboxes[:,:,3], gt_bboxes[:,:,3], y_maxs)
 
         # distances from a location to each side of the bounding box
         # Refer to equation(1) from FCOS paper.
-        cb_dist_left = NotImplemented
-        cb_dist_right = NotImplemented
-        cb_dist_top = NotImplemented
-        cb_dist_bottom = NotImplemented
+        cb_dist_left = xs_expand - center_gts[..., 0]
+        cb_dist_right = center_gts[..., 2] - xs_expand
+        cb_dist_top = ys_expand - center_gts[..., 1]
+        cb_dist_bottom = center_gts[..., 3] - ys_expand
         center_bbox = torch.stack(
             (cb_dist_left, cb_dist_top, cb_dist_right, cb_dist_bottom),
             -1
@@ -288,28 +300,30 @@ def fcos_target_single_image(
         # condition1: a point from center_bbox should be inside a gt bbox
         # all distances (center_l, center_t, center_r, center_b) > 0
         # hint: all distances (l, t, r, b) > 0. use :func:`torch.min`.
-        inside_gt_bbox_mask = NotImplemented
+        inside_gt_bbox_mask = center_bbox.min(-1)[0] > 0 
     else:
         # condition1: a point should be inside a gt bbox
         # hint: all distances (l, t, r, b) > 0. use :func:`torch.min`.
-        inside_gt_bbox_mask = NotImplemented
+        inside_gt_bbox_mask = bbox_targets.min(2)[0] > 0 
 
     # condition2: limit the regression range for each location
-    max_regress_distance = NotImplemented   # hint: use :func:`torch.max`.
+    max_regress_distance = bbox_targets.max(dim=2)[0] # hint: use :func:`torch.max`.
 
     # The mask whether `max_regress_distance` on every points is bounded
     #   between the side values regress_ranges.
     # See section 3.2 3rd paragraph on FCOS paper.
-    inside_regress_range = (NotImplemented)
+    inside_regress_range = (max_regress_distance >= regress_ranges[...,0]) & (max_regress_distance <= regress_ranges[...,1])
 
     # filter areas that violate condition1 and condition2 above.
-    areas[NotImplemented] = INF   # use `inside_gt_bbox_mask`
-    areas[NotImplemented] = INF   # use `inside_regress_range`
+    areas[inside_gt_bbox_mask==0] = INF   # use `inside_gt_bbox_mask`
+    areas[inside_regress_range==0] = INF   # use `inside_regress_range`
 
     # If there are still more than one objects for a location,
     # we choose the one with minimal area across `num_gts` axis.
     # Hint: use :func:`torch.min`.
-    min_area, min_area_inds = NotImplemented
+    min_area, min_area_inds = areas.min(dim=1)
+    # min_area_inds = min_area_inds.squeeze()
+    # min_area = min_area.squeeze()
 
     # ground-truth assignments w.r.t. bbox area indices
     labels = gt_labels[min_area_inds]
@@ -332,6 +346,9 @@ def compute_centerness_targets(pos_bbox_targets):
 
     """ your code starts here """
     centerness_targets = pos_bbox_targets.new_zeros(pos_bbox_targets.size(0), 1)
+    lr_matrix = pos_bbox_targets[:, [0, 2]]
+    td_matrix = pos_bbox_targets[:, [1, 3]]
+    centerness_targets = torch.sqrt((lr_matrix.min(-1)[0] / lr_matrix.max(-1)[0])*(td_matrix.min(-1)[0]/td_matrix.max(-1)[0]))
     """ your code ends here """
 
     return centerness_targets

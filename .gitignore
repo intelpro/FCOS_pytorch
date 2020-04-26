@@ -2,4 +2,4 @@ datasets/
 output/
 detectron2/
 tags
-__pycache__
+__pycache__/**
