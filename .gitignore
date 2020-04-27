@@ -2,4 +2,8 @@ datasets/
 output/
 detectron2/
 tags
+tags.lock
+tags.temp
 __pycache__
+.flake8
+.fuse_hidden000110ef00000018

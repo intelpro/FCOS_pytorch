@@ -95,12 +95,6 @@ def FCOSLosses(
         reduction="sum"
     ) / num_pos
 
-    print('loss_bbox: ')
-    print(loss_bbox)
-    print('loss_centerness: ')
-    print(loss_centerness)
-    print('loss cls: ')
-    print(loss_cls)
     # final loss dict.
     losses = dict(
         loss_fcos_cls=loss_cls,

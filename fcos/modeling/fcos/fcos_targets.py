@@ -348,7 +348,8 @@ def compute_centerness_targets(pos_bbox_targets):
     centerness_targets = pos_bbox_targets.new_zeros(pos_bbox_targets.size(0), 1)
     lr_matrix = pos_bbox_targets[:, [0, 2]]
     tb_matrix = pos_bbox_targets[:, [1, 3]]
-    centerness_targets = torch.sqrt((lr_matrix.min(-1)[0] / lr_matrix.max(-1)[0])*(tb_matrix.min(-1)[0]/tb_matrix.max(-1)[0]))
+    centerness_targets = torch.sqrt((lr_matrix.min(dim=-1)[0] / lr_matrix.max(dim=-1)[0])* \
+                                    (tb_matrix.min(dim=-1)[0] / tb_matrix.max(dim=-1)[0]))
     """ your code ends here """
 
     return centerness_targets
