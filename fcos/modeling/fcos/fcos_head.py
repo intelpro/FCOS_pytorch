@@ -1,5 +1,6 @@
 import math
 import torch.nn as nn
+from torch.nn import functional as F
 import torch as th
 from detectron2.layers import Conv2d, DeformConv, ShapeSpec
 from fcos.layers import Scale, normal_init
@@ -111,7 +112,7 @@ class FCOSHead(nn.Module):
             centernesses.append(self.centerness(cls_output))
             # find bbox pred
             reg_feat = self.reg_convs(convs_feat)
-            bbox_pred = th.exp(self.scales[feat_level](self.bbox_pred(reg_feat)))
+            bbox_pred = F.relu(self.scales[feat_level](self.bbox_pred(reg_feat)))
             bbox_preds.append(bbox_pred)
             """ your code ends here """
         return cls_scores, bbox_preds, centernesses

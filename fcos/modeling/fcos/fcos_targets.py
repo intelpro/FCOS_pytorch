@@ -243,7 +243,7 @@ def fcos_target_single_image(
     xs = xs.unsqueeze(1)
     ys = ys.unsqueeze(1)
     xs_expand = xs.expand(num_points, num_gts) # hint: use :func:`torch.expand`.
-    ys_expand = ys.expand(num_points, num_gts)# hint: use :func:`torch.expand`.
+    ys_expand = ys.expand(num_points, num_gts) # hint: use :func:`torch.expand`.
     assert xs_expand.shape==(num_points, num_gts)
     assert ys_expand.shape==(num_points, num_gts)
 
@@ -347,8 +347,8 @@ def compute_centerness_targets(pos_bbox_targets):
     """ your code starts here """
     centerness_targets = pos_bbox_targets.new_zeros(pos_bbox_targets.size(0), 1)
     lr_matrix = pos_bbox_targets[:, [0, 2]]
-    td_matrix = pos_bbox_targets[:, [1, 3]]
-    centerness_targets = torch.sqrt((lr_matrix.min(-1)[0] / lr_matrix.max(-1)[0])*(td_matrix.min(-1)[0]/td_matrix.max(-1)[0]))
+    tb_matrix = pos_bbox_targets[:, [1, 3]]
+    centerness_targets = torch.sqrt((lr_matrix.min(-1)[0] / lr_matrix.max(-1)[0])*(tb_matrix.min(-1)[0]/tb_matrix.max(-1)[0]))
     """ your code ends here """
 
     return centerness_targets
