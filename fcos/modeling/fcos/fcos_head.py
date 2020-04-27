@@ -112,7 +112,7 @@ class FCOSHead(nn.Module):
             centernesses.append(self.centerness(cls_output))
             # find bbox pred
             reg_feat = self.reg_convs(convs_feat)
-            bbox_pred = F.relu(self.scales[feat_level](self.bbox_pred(reg_feat)))
+            bbox_pred = th.exp(self.scales[feat_level](self.bbox_pred(reg_feat)))
             bbox_preds.append(bbox_pred)
             """ your code ends here """
         return cls_scores, bbox_preds, centernesses
