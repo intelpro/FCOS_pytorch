@@ -64,7 +64,7 @@ class FCOS(nn.Module):
                 Each `Instances` stores ground-truth instances for the corresponding image.
 
         Returns:
-            proposals: list[Instances]: contains fields "pred_boxes", "scores", "pred_classes",
+            proposals: list[Instances]: contains fields "pred_boxes", "scores", "class_id",
             "locations".
             loss: dict[Tensor] or None
         """
@@ -172,8 +172,7 @@ class FCOS(nn.Module):
             Same as `predict_proposals`, but for only one image.
         """
         assert len(cls_scores) == len(bbox_preds) == len(all_level_points)
-        bboxes_list = []
-
+        bboxes_list = [] 
         # Iterate over every feature level
         for (cls_score, bbox_pred, centerness, points) in zip(
             cls_scores, bbox_preds, centernesses, all_level_points
@@ -185,12 +184,34 @@ class FCOS(nn.Module):
             bbox_pred = bbox_pred.permute(1, 2, 0).reshape(-1, 4)
             # (1, Hi, Wi) -> (Hi*Wi, )
             centerness = centerness.permute(1, 2, 0).reshape(-1).sigmoid()
-            """ Your code starts here """
+            candid_ids = scores > self.score_threshold
+            pre_nms_top_n = candid_ids.view(-1).sum(0)
+            pre_nms_top_n = pre_nms_top_n.clamp(max=self.nms_pre_topk)
+            candid_ids_nonzero = candid_ids.nonzero()
+            box_loc = candid_ids_nonzero[:, 0]
+            class_id = candid_ids_nonzero[:, 1]
+            box_regression = bbox_pred[box_loc, :]
+            box_points = points[box_loc, :]
+            cls_pred = scores * centerness[..., None]
+            box_cls = cls_pred[candid_ids]
+            if candid_ids.sum().item() > pre_nms_top_n:
+                box_cls, top_k_id = box_cls.topk(pre_nms_top_n, sorted=False)
+                class_id = class_id[top_k_id]
+                box_regression = box_regression[top_k_id]
+                box_points = box_points[top_k_id]
 
-            """ Your code ends here """
-
+            detection_result = torch.stack([box_points[:, 0] - box_regression[:, 0], \
+                                            box_points[:, 1] - box_regression[:, 1], \
+                                            box_points[:, 0] + box_regression[:, 2], \
+                                            box_points[:, 1] + box_regression[:, 3]], dim=1)
+            box_cls_sqrt = torch.sqrt(box_cls)
+            boxlist = Instances(image_size)
+            boxlist.pred_classes = class_id
+            boxlist.pred_boxes = Boxes(detection_result)
+            boxlist.scores = box_cls_sqrt 
+            bboxes_list.append(boxlist)
         bboxes_list = Instances.cat(bboxes_list)
-
+ 
         # non-maximum suppression per-image.
         results = ml_nms(
             bboxes_list,
