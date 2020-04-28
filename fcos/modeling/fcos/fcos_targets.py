@@ -140,8 +140,9 @@ def fcos_target(
     # the number of points per img, per level
     num_points = [center.size(0) for center in points]
 
+
     # get labels and bbox_targets of each image; per-image computation.
-    labels_list, bbox_targets_list = multi_apply(
+    labels_list, bbox_targets_list_= multi_apply(
         fcos_target_single_image,
         gt_instance_list,
         points=concat_points,
@@ -152,6 +153,7 @@ def fcos_target(
         normalize_reg_targets=normalize_reg_targets,
         num_classes=num_classes
     )
+
 
     # split to per img, per feature level
     labels_list = [labels.split(num_points, 0) for labels in labels_list]
@@ -222,37 +224,29 @@ def fcos_target_single_image(
     # `areas`: should be `torch.Tensor` shape of (num_points, num_gts, 1)
     areas = (gt_bboxes[:, 2] - gt_bboxes[:, 0]+1)*(gt_bboxes[:, 3] - gt_bboxes[:, 1]+1) # 1. `torch.Tensor` shape of (num_gts, 1)
     areas = areas[None].repeat(num_points, 1)
-    """
-    areas_un = areas.unsqueeze(1)
-    areas = areas_un.repeat(num_points, 1, 1)
-    """
     assert areas.shape==(num_points, num_gts)
 
     # `regress_ranges`: should be `torch.Tensor` shape of (num_points, num_gts, 2)
-    regress_ranges = regress_ranges.unsqueeze(1)
-    assert regress_ranges.shape==(num_points, 1, 2)
-    regress_ranges = regress_ranges.expand(num_points, num_gts, 2) # hint: use :func:`torch.expand`.
+    regress_ranges = regress_ranges[:,None,:].expand(num_points, num_gts, 2) # hint: use :func:`torch.expand`.
     assert regress_ranges.shape==(num_points, num_gts, 2)
 
     # `gt_bboxes`: should be `torch.Tensor` shape of (num_points, num_gts, 4)
-    gt_bboxes = gt_bboxes.expand(num_points, num_gts, 4)# hint: use :func:`torch.expand`.
+    gt_bboxes = gt_bboxes[None].expand(num_points, num_gts, 4)# hint: use :func:`torch.expand`.
     assert gt_bboxes.shape==(num_points, num_gts, 4)
 
     # align each coordinate  component xs, ys in shape as (num_points, num_gts)
     xs, ys = points[:, 0], points[:, 1]
-    xs = xs.unsqueeze(1)
-    ys = ys.unsqueeze(1)
-    xs_expand = xs.expand(num_points, num_gts) # hint: use :func:`torch.expand`.
-    ys_expand = ys.expand(num_points, num_gts) # hint: use :func:`torch.expand`.
-    assert xs_expand.shape==(num_points, num_gts)
-    assert ys_expand.shape==(num_points, num_gts)
+    xs = xs[:, None].expand(num_points, num_gts) # hint: use :func:`torch.expand`.
+    ys = ys[:, None].expand(num_points, num_gts) # hint: use :func:`torch.expand`.
+    assert xs.shape==(num_points, num_gts)
+    assert ys.shape==(num_points, num_gts)
 
     # distances to each four side of gt bboxes.
     # The equations correspond to equation(1) from FCOS paper.
-    left = xs_expand - gt_bboxes[..., 0]
-    right = gt_bboxes[..., 2] - xs_expand
-    top = ys_expand - gt_bboxes[..., 1]
-    bottom = gt_bboxes[..., 3] - ys_expand
+    left = xs- gt_bboxes[..., 0]
+    right = gt_bboxes[..., 2] - xs
+    top = ys- gt_bboxes[..., 1]
+    bottom = gt_bboxes[..., 3] - ys
     bbox_targets = torch.stack((left, top, right, bottom), -1)
 
     if center_sample:
@@ -289,10 +283,10 @@ def fcos_target_single_image(
 
         # distances from a location to each side of the bounding box
         # Refer to equation(1) from FCOS paper.
-        cb_dist_left = xs_expand - center_gts[..., 0]
-        cb_dist_right = center_gts[..., 2] - xs_expand
-        cb_dist_top = ys_expand - center_gts[..., 1]
-        cb_dist_bottom = center_gts[..., 3] - ys_expand
+        cb_dist_left = xs- center_gts[..., 0]
+        cb_dist_right = center_gts[..., 2] - xs
+        cb_dist_top = ys- center_gts[..., 1]
+        cb_dist_bottom = center_gts[..., 3] - ys
         center_bbox = torch.stack(
             (cb_dist_left, cb_dist_top, cb_dist_right, cb_dist_bottom),
             -1
@@ -304,10 +298,10 @@ def fcos_target_single_image(
     else:
         # condition1: a point should be inside a gt bbox
         # hint: all distances (l, t, r, b) > 0. use :func:`torch.min`.
-        inside_gt_bbox_mask = bbox_targets.min(2)[0] > 0 
+        inside_gt_bbox_mask = bbox_targets.min(-1)[0] > 0 
 
     # condition2: limit the regression range for each location
-    max_regress_distance = bbox_targets.max(dim=2)[0] # hint: use :func:`torch.max`.
+    max_regress_distance = bbox_targets.max(-1)[0] # hint: use :func:`torch.max`.
 
     # The mask whether `max_regress_distance` on every points is bounded
     #   between the side values regress_ranges.
