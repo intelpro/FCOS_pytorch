@@ -142,7 +142,7 @@ def fcos_target(
 
 
     # get labels and bbox_targets of each image; per-image computation.
-    labels_list, bbox_targets_list_= multi_apply(
+    labels_list, bbox_targets_list = multi_apply(
         fcos_target_single_image,
         gt_instance_list,
         points=concat_points,
