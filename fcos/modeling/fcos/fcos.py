@@ -134,13 +134,12 @@ class FCOS(nn.Module):
             centerness_pred_list = [
                 centernesses[i][img_id].detach() for i in range(num_levels)
             ]
-
             # per-image proposal comutation
             det_bboxes = self.predict_proposals_single_image(
-                all_level_points,
                 cls_score_list,
                 bbox_pred_list,
                 centerness_pred_list,
+                all_level_points,
                 image_sizes[img_id]
             )
             result_list.append(det_bboxes)
