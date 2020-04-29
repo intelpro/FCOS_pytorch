@@ -154,29 +154,11 @@ class FCOS(nn.Module):
         all_level_points,
         image_size
     ):
-        """
-        Single-image inference. Return bounding-box detection results by thresholding
-        on scores and applying non-maximum suppression (NMS).
 
-        Arguments:
-            cls_scores (list[Tensor]): list of #feature levels. Each entry contains
-                tensor of size (C, Hi, Wi), where i denotes a specific feature level.
-            bbox_preds (list[Tensor]): Same shape as 'cls_scores' except that C becomes 4.
-            centernesses (list[Tensor]): Same shape as 'cls_scores' except that C becomes 1.
-            all_level_points (list[Tensor]): list of #feature levels. Each entry contains
-                tensor of size (Hi*Wi, 2), a set of point coordinates (xi, yi) of all feature map
-                locations on 'feature level i' in image coordinate.
-            image_size (tuple(H, W)): a tuple of the image height and width.
-
-        Returns:
-            Same as `predict_proposals`, but for only one image.
-        """
         assert len(cls_scores) == len(bbox_preds) == len(all_level_points)
         bboxes_list = [] 
         # Iterate over every feature level
-        for (cls_score, bbox_pred, centerness, points) in zip(
-            cls_scores, bbox_preds, centernesses, all_level_points
-        ):
+        for (cls_score, bbox_pred, centerness, points) in zip(cls_scores, bbox_preds, centernesses, all_level_points):
             assert cls_score.size()[-2:] == bbox_pred.size()[-2:]
             # (C, Hi, Wi) -> (Hi*Wi, C)
             scores = cls_score.permute(1, 2, 0).reshape(-1, self.num_classes).sigmoid()
@@ -184,34 +166,30 @@ class FCOS(nn.Module):
             bbox_pred = bbox_pred.permute(1, 2, 0).reshape(-1, 4)
             # (1, Hi, Wi) -> (Hi*Wi, )
             centerness = centerness.permute(1, 2, 0).reshape(-1).sigmoid()
-            candid_ids = scores > self.score_threshold
-            pre_nms_top_n = candid_ids.view(-1).sum(0)
-            pre_nms_top_n = pre_nms_top_n.clamp(max=self.nms_pre_topk)
-            candid_ids_nonzero = candid_ids.nonzero()
-            box_loc = candid_ids_nonzero[:, 0]
-            class_id = candid_ids_nonzero[:, 1]
-            box_regression = bbox_pred[box_loc, :]
-            box_points = points[box_loc, :]
-            cls_pred = scores * centerness[..., None]
-            box_cls = cls_pred[candid_ids]
-            if candid_ids.sum().item() > pre_nms_top_n:
-                box_cls, top_k_id = box_cls.topk(pre_nms_top_n, sorted=False)
-                class_id = class_id[top_k_id]
-                box_regression = box_regression[top_k_id]
-                box_points = box_points[top_k_id]
-
-            detection_result = torch.stack([box_points[:, 0] - box_regression[:, 0], \
-                                            box_points[:, 1] - box_regression[:, 1], \
-                                            box_points[:, 0] + box_regression[:, 2], \
-                                            box_points[:, 1] + box_regression[:, 3]], dim=1)
-            box_cls_sqrt = torch.sqrt(box_cls)
+            max_scores, idx = (scores * centerness[:, None]).max(dim=1)
+            if  max_scores.shape[0] > self.nms_pre_topk:
+                nms_pre_topk = max_scores.shape[0]
+                top_k_scores, topk_inds = max_scores.topk(nms_pre_topk)
+                points = points[topk_inds, :]
+                bbox_pred = bbox_pred[topk_inds, :]
+                scores = scores[topk_inds, :]
+                class_id = idx[topk_inds]
+                bboxes = distance2bbox(points, bbox_pred, max_shape=image_size)
+            else:
+                nms_pre_topk = max_scores.shape[0]
+                top_k_scores, topk_inds = max_scores.topk(nms_pre_topk)
+                points = points[topk_inds, :]
+                bbox_pred = bbox_pred[topk_inds, :]
+                scores = scores[topk_inds, :]
+                class_id = idx[topk_inds] 
+                bboxes = distance2bbox(points, bbox_pred, max_shape=image_size)
+            boxlist = Instances(image_size)
             boxlist = Instances(image_size)
             boxlist.pred_classes = class_id
-            boxlist.pred_boxes = Boxes(detection_result)
-            boxlist.scores = box_cls_sqrt 
+            boxlist.pred_boxes = Boxes(bboxes)
+            boxlist.scores = torch.sqrt(top_k_scores)
             bboxes_list.append(boxlist)
         bboxes_list = Instances.cat(bboxes_list)
- 
         # non-maximum suppression per-image.
         results = ml_nms(
             bboxes_list,
@@ -220,3 +198,24 @@ class FCOS(nn.Module):
             max_proposals=self.nms_post_topk
         )
         return results
+
+def distance2bbox(points, distance, max_shape=None):
+    """Decode distance prediction to bounding box.
+    Args:
+        points (Tensor): Shape (n, 2), [x, y].
+        distance (Tensor): Distance from the given point to 4
+            boundaries (left, top, right, bottom).
+        max_shape (tuple): Shape of the image.
+    Returns:
+        Tensor: Decoded bboxes.
+    """
+    x1 = points[:, 0] - distance[:, 0]
+    y1 = points[:, 1] - distance[:, 1]
+    x2 = points[:, 0] + distance[:, 2]
+    y2 = points[:, 1] + distance[:, 3]
+    if max_shape is not None:
+        x1 = x1.clamp(min=0, max=max_shape[1] - 1)
+        y1 = y1.clamp(min=0, max=max_shape[0] - 1)
+        x2 = x2.clamp(min=0, max=max_shape[1] - 1)
+        y2 = y2.clamp(min=0, max=max_shape[0] - 1)
+    return torch.stack([x1, y1, x2, y2], -1)
