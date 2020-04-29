@@ -50,19 +50,23 @@ class FCOSHead(nn.Module):
         activation = nn.ReLU()
 
         """ your code starts here """
-        self.shared_convs = nn.Sequential(nn.Conv2d(self.in_channels, self.in_channels, kernel_size=3, padding=1), \
-                                          nn.GroupNorm(32, self.in_channels),
-                                          activation)
-        self.cls_convs = nn.Sequential(nn.Conv2d(self.in_channels, self.in_channels, kernel_size=3, padding=1), \
-                                       nn.GroupNorm(32, self.in_channels), \
-                                       activation)
-        self.reg_convs = nn.Sequential(nn.Conv2d(self.in_channels, self.in_channels, kernel_size=3, padding=1), \
-                                       nn.GroupNorm(32, self.in_channels), \
-                                       activation)
+        conv_stack = []
+        if self.use_deformable:
+            conv_func = DeformConv
+        else:
+            conv_func = nn.Conv2d
+        for i in range(self.num_stacked_convs):
+            conv_stack.append(conv_func(self.in_channels, self.in_channels, kernel_size=3, stride=1, padding=1, bias=False))
+            if self.norm_layer=='GN': 
+                conv_stack.append(nn.GroupNorm(32, self.in_channels))
+            conv_stack.append(activation)
+        self.shared_convs = nn.Sequential(*conv_stack)
+        self.cls_convs = nn.Sequential(*conv_stack)
+        self.reg_convs = nn.Sequential(*conv_stack)
         self.cls_logits = nn.Conv2d(self.in_channels, self.num_classes, kernel_size=3, padding=1)
         self.bbox_pred = nn.Conv2d(self.in_channels, 4, kernel_size=3, padding=1)
         self.centerness = nn.Conv2d(self.in_channels, 1, kernel_size=3, padding=1)
-        self.scales = nn.ModuleList([Scale(1.0)]*5)
+        self.scales = nn.ModuleList([Scale(1.0) for _ in self.fpn_strides])
         """ your code ends here """
 
     def _init_weights(self):
