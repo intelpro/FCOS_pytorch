@@ -85,7 +85,7 @@ def get_points_single(featmap_size, stride, device):
     height, width = featmap_size
     x_shift = torch.arange(0, width*stride, step=stride, dtype=torch.float32, device=device)
     y_shift = torch.arange(0, height*stride, step=stride, dtype=torch.float32, device=device)
-    mesh_x, mesh_y = torch.meshgrid(x_shift, y_shift)
+    mesh_y, mesh_x = torch.meshgrid(y_shift, x_shift)
     mesh_x_re = mesh_x.reshape(-1)
     mesh_y_re = mesh_y.reshape(-1)
     points = torch.stack((mesh_x_re, mesh_y_re), 1) + stride//2

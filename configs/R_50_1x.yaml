@@ -8,7 +8,7 @@ MODEL:
     DEPTH: 50
   FCOS:
     # we provide implementation of normalization option in improvements part.
-    NORMALIZE_REG_TARGETS: True  # fix with True
+    NORMALIZE_REG_TARGETS: True # fix with True
 INPUT:
   MIN_SIZE_TRAIN: (800,)
 SOLVER:

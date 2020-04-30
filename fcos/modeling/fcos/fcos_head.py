@@ -119,9 +119,9 @@ class FCOSHead(nn.Module):
             # find logit
             cls_scores.append(self.cls_logits(cls_output))
             # find centerness
-            centernesses.append(self.centerness(cls_output))
             # find bbox pred
             reg_feat = self.reg_convs(convs_feat)
+            centernesses.append(self.centerness(cls_output))
             bbox_pred = th.exp(self.scales[feat_level](self.bbox_pred(reg_feat)))
             bbox_preds.append(bbox_pred)
             """ your code ends here """

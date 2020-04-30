@@ -143,21 +143,22 @@ class FCOS(nn.Module):
                 image_sizes[img_id]
             )
             result_list.append(det_bboxes)
+        # boxlists = self.select_over_all_levels(result_list)
         return result_list
 
-    def predict_proposals_single_image(
-        self,
-        cls_scores,
-        bbox_preds,
-        centernesses,
-        all_level_points,
-        image_size
-    ):
+    def predict_proposals_single_image(self,
+            cls_scores,
+            bbox_preds,
+            centernesses,
+            all_level_points,
+            image_sizes
+            ):
 
         assert len(cls_scores) == len(bbox_preds) == len(all_level_points)
         bboxes_list = [] 
         # Iterate over every feature level
         for (cls_score, bbox_pred, centerness, points) in zip(cls_scores, bbox_preds, centernesses, all_level_points):
+            # put in the same format as locations
             assert cls_score.size()[-2:] == bbox_pred.size()[-2:]
             # (C, Hi, Wi) -> (Hi*Wi, C)
             scores = cls_score.permute(1, 2, 0).reshape(-1, self.num_classes).sigmoid()
@@ -165,34 +166,38 @@ class FCOS(nn.Module):
             bbox_pred = bbox_pred.permute(1, 2, 0).reshape(-1, 4)
             # (1, Hi, Wi) -> (Hi*Wi, )
             centerness = centerness.permute(1, 2, 0).reshape(-1).sigmoid()
-            box_cls = scores * centerness[:, None]
-            max_scores, idx = (box_cls).max(dim=1)
-            candidate_inds = scores > self.score_threshold
-            candidate_nonzeros = candidate_inds.nonzero()
-            bbox_loc = candidate_nonzeros[:, 0]
-            class_id = candidate_nonzeros[:, 1]
-            bbox_pred_ = bbox_pred[bbox_loc]
-            points_ = points[bbox_loc]
-            box_cls_candidate = box_cls[candidate_inds]
-            scores_ = max_scores[bbox_loc]
-            if bbox_pred.shape[0] > self.nms_pre_topk:
-                top_k_scores, topk_inds = max_scores.topk(self.nms_pre_topk)
-                points_ = points[topk_inds, :]
-                bbox_pred_ = bbox_pred[topk_inds, :]
-                scores_ = max_scores[topk_inds]
-                class_id = idx[topk_inds]
-            detections = torch.stack([
-                points_[:, 0] - bbox_pred_[:, 0],
-                points_[:, 1] - bbox_pred_[:, 1],
-                points_[:, 0] + bbox_pred_[:, 2],
-                points_[:, 1] + bbox_pred_[:, 3],
-            ], dim=1)
-            boxlist = Instances(image_size)
-            boxlist.pred_classes = class_id
-            boxlist.pred_boxes = Boxes(detections)
-            boxlist.scores = torch.sqrt(scores_)
-            bboxes_list.append(boxlist)
 
+            candidate_inds = scores > self.score_threshold
+            pre_nms_top_n = candidate_inds.view(-1).sum()
+            pre_nms_top_n = pre_nms_top_n.clamp(max=self.nms_pre_topk)
+            scores = scores * centerness[:, None]
+            scores = scores[candidate_inds]
+
+            candidate_nonzeros = candidate_inds.nonzero()
+            box_loc = candidate_nonzeros[:, 0]
+            class_id = candidate_nonzeros[:, 1]
+
+            selected_box = bbox_pred[box_loc]
+            points_loc = points[box_loc]
+
+            if candidate_inds.sum().item() > pre_nms_top_n.item():
+                scores, top_k_indices = scores.topk(per_pre_nms_top_n)
+                class_id = class_id[top_k_indices]
+                selected_box = selected_box[top_k_indices]
+                points_loc = points_loc[top_k_indices]
+
+            detections = torch.stack([
+                points_loc[:, 0] - selected_box[:, 0],
+                points_loc[:, 1] - selected_box[:, 1],
+                points_loc[:, 0] + selected_box[:, 2],
+                points_loc[:, 1] + selected_box[:, 3],
+            ], dim=1)
+
+            boxlist = Instances(image_sizes)
+            boxlist.pred_boxes = Boxes(detections)
+            boxlist.scores = torch.sqrt(scores)
+            boxlist.pred_classes = class_id
+            bboxes_list.append(boxlist)
         bboxes_list = Instances.cat(bboxes_list)
         # non-maximum suppression per-image.
         results = ml_nms(
@@ -202,4 +207,3 @@ class FCOS(nn.Module):
             max_proposals=self.nms_post_topk
         )
         return results
-
