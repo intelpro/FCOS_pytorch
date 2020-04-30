@@ -24,7 +24,7 @@ _C.MODEL.FCOS.LOSS_ALPHA = 0.25
 _C.MODEL.FCOS.LOSS_GAMMA = 2.0
 
 # Inference parameters
-_C.MODEL.FCOS.SCORE_THRESH_TEST = 0.5
+_C.MODEL.FCOS.SCORE_THRESH_TEST = 0.45
 _C.MODEL.FCOS.NMS_THRESH_TEST = 0.6
 _C.MODEL.FCOS.NMS_PRE_TOPK = 1000
 _C.MODEL.FCOS.NMS_POST_TOPK = 100
@@ -40,11 +40,11 @@ _C.MODEL.FCOS.NORM = "none"  # Support "GN" or none
 _C.MODEL.FCOS.CTR_ON_REG = False
 
 # 3. center sampling
-_C.MODEL.FCOS.CENTER_SAMPLE = False
+_C.MODEL.FCOS.CENTER_SAMPLE = True
 _C.MODEL.FCOS.POS_RADIUS = 1.5
 
 # 4. IoU loss type. ['iou', 'linear_iou', 'giou']
-_C.MODEL.FCOS.LOC_LOSS_TYPE = 'iou'
+_C.MODEL.FCOS.LOC_LOSS_TYPE = 'giou'
 
 # 5. Normalization of fcos regression targets by each level of fpn stride.
 _C.MODEL.FCOS.NORMALIZE_REG_TARGETS = True

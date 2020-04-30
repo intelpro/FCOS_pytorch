@@ -181,7 +181,7 @@ class FCOS(nn.Module):
             points_loc = points[box_loc]
 
             if candidate_inds.sum().item() > pre_nms_top_n.item():
-                scores, top_k_indices = scores.topk(per_pre_nms_top_n)
+                scores, top_k_indices = scores.topk(pre_nms_top_n)
                 class_id = class_id[top_k_indices]
                 selected_box = selected_box[top_k_indices]
                 points_loc = points_loc[top_k_indices]
