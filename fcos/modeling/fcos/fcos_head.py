@@ -50,24 +50,31 @@ class FCOSHead(nn.Module):
         activation = nn.ReLU()
 
         """ your code starts here """
-        conv_stack = []
+        conv_stack1, conv_stack2, conv_stack3 = [], [], []
         if self.use_deformable:
             conv_func = DeformConv
         else:
             conv_func = nn.Conv2d
         for i in range(self.num_stacked_convs):
-            conv_stack.append(conv_func(self.in_channels, self.in_channels, kernel_size=3, stride=1, padding=1, bias=False))
+            conv_stack1.append(conv_func(self.in_channels, self.in_channels, kernel_size=3, stride=1, padding=1, bias=True))
+            conv_stack2.append(conv_func(self.in_channels, self.in_channels, kernel_size=3, stride=1, padding=1, bias=True))
+            conv_stack3.append(conv_func(self.in_channels, self.in_channels, kernel_size=3, stride=1, padding=1, bias=True))
             if self.norm_layer=='GN': 
-                conv_stack.append(nn.GroupNorm(32, self.in_channels))
-            conv_stack.append(activation)
-        self.shared_convs = nn.Sequential(*conv_stack)
-        self.cls_convs = nn.Sequential(*conv_stack)
-        self.reg_convs = nn.Sequential(*conv_stack)
+                conv_stack1.append(nn.GroupNorm(32, self.in_channels))
+                conv_stack2.append(nn.GroupNorm(32, self.in_channels))
+                conv_stack3.append(nn.GroupNorm(32, self.in_channels))
+            conv_stack1.append(activation)
+            conv_stack2.append(activation)
+            conv_stack3.append(activation)
+        self.shared_convs = nn.Sequential(*conv_stack1)
+        self.cls_convs = nn.Sequential(*conv_stack2)
+        self.reg_convs = nn.Sequential(*conv_stack3)
         self.cls_logits = nn.Conv2d(self.in_channels, self.num_classes, kernel_size=3, padding=1)
         self.bbox_pred = nn.Conv2d(self.in_channels, 4, kernel_size=3, padding=1)
         self.centerness = nn.Conv2d(self.in_channels, 1, kernel_size=3, padding=1)
         self.scales = nn.ModuleList([Scale(1.0) for _ in self.fpn_strides])
         """ your code ends here """
+
 
     def _init_weights(self):
         for modules in [
@@ -109,7 +116,6 @@ class FCOSHead(nn.Module):
             """ your code starts here """
             convs_feat = self.shared_convs(feature)
             cls_output = self.cls_convs(convs_feat)
-            
             # find logit
             cls_scores.append(self.cls_logits(cls_output))
             # find centerness
@@ -118,5 +124,6 @@ class FCOSHead(nn.Module):
             reg_feat = self.reg_convs(convs_feat)
             bbox_pred = th.exp(self.scales[feat_level](self.bbox_pred(reg_feat)))
             bbox_preds.append(bbox_pred)
+            import pdb; pdb.set_trace()
             """ your code ends here """
         return cls_scores, bbox_preds, centernesses
