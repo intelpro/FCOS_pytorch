@@ -143,7 +143,6 @@ class FCOS(nn.Module):
                 image_sizes[img_id]
             )
             result_list.append(det_bboxes)
-        # boxlists = self.select_over_all_levels(result_list)
         return result_list
 
     def predict_proposals_single_image(self,
