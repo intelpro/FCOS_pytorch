@@ -203,7 +203,6 @@ class FCOS(nn.Module):
         results = ml_nms(
             bboxes_list,
             self.nms_threshold,
-            # Limit to max_per_image detections **over all classes**
             max_proposals=self.nms_post_topk
         )
         return results
