@@ -19,3 +19,4 @@ This is repository of my re-implementation code of FCOS: Fully Convolutional One
 	--eval-only MODEL.WEIGHTS /path/to/checkpoint_file
 ## Code reference 
 	https://github.com/aim-uofa/AdelaiDet
+	https://github.com/facebookresearch/detectron2
