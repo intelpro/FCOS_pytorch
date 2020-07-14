@@ -9,3 +9,7 @@ This is repository of implementation of FCOS: Fully Convolutional One-Stage Obje
 	# install it from a local clone:
 	$ git clone https://github.com/facebookresearch/detectron2.git
 	$ cd detectron2 && python -m pip install -e .
+### Training with coco dataset 
+	sh run.sh
+### Run demo with trained model 
+	sh run_demo.sh
