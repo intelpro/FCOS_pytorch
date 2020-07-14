@@ -9,7 +9,11 @@ This is repository of my Re-implementation code of FCOS: Fully Convolutional One
 	# install it from a local clone:
 	$ git clone https://github.com/facebookresearch/detectron2.git
 	$ cd detectron2 && python -m pip install -e .
-### Training with coco dataset 
-	sh run.sh
+### Training with coco dataset(4 GPUs)
+	python train_net.py --num-gpus 4 --config-file configs/R_50_1x.yaml
+### Training with coco dataset(1 GPUs)
+	python train_net.py --config-file configs/R_50_1x.yaml \
+	--num-gpus 1 SOLVER.IMS_PER_BATCH 4 SOLVER.BASE_LR 0.0025
 ### Run demo with trained model 
-	sh run_demo.sh
+	python train_net.py --config-file configs/R_50_1x.yaml \
+	--eval-only MODEL.WEIGHTS /path/to/checkpoint_file
