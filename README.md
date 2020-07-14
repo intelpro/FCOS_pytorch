@@ -17,3 +17,5 @@ This is repository of my Re-implementation code of FCOS: Fully Convolutional One
 ### Run demo with trained model 
 	python train_net.py --config-file configs/R_50_1x.yaml \
 	--eval-only MODEL.WEIGHTS /path/to/checkpoint_file
+## Code reference 
+	https://github.com/aim-uofa/AdelaiDet
