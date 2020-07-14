@@ -1,5 +1,5 @@
 # FCOS pytorch implementation based on detectron2 
-This is repository of my Re-implementation code of FCOS: Fully Convolutional One-Stage Object Detection - ICCV, 2019, pp. 9627-9636
+This is repository of my re-implementation code of FCOS: Fully Convolutional One-Stage Object Detection - ICCV, 2019, pp. 9627-9636
 ### Requirement 
 	Ubuntu 16.04
 	Pytorch >= 1.3
